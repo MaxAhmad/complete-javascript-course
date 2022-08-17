@@ -422,3 +422,33 @@ const totalUSDDeposits = movements.filter(mov => mov > 0)
     console.log(totalUSDDeposits)
 
 
+/**
+ * THE FIND METHOD
+ * we can use the find method  to retrive an element of an array base on a condition
+ * The find method takes a callback function and loops over an array
+ * the find method does not return an array but returns the first element that matches the condition
+ * The difference between the find and filter method is that while the filter method returns an array of all the conditions met
+ * the find method returns only the first element that matches the condition
+ * A good use case scenario is using the find method to implement logining into an application
+ */
+
+
+const firstWithdrawal = movements.find(mov => mov < 0)
+console.log(movements)
+console.log(firstWithdrawal)
+
+// let's use the find method to find a particular user in the acconts object
+// the jessica array
+
+console.log(accounts)
+
+const account = accounts.find(acc => acc.owner === 'Jessica Davis')
+console.log(account)
+
+// implementing using the FOR OF loop
+
+for(const accountJessica of accounts){
+  if (accountJessica.owner === 'Jessica Davis'){
+    console.log(accountJessica)
+  }
+}
