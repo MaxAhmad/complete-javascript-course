@@ -76,26 +76,28 @@ const displayMovements = function(movements){
   })
 }
 
-displayMovements(account1.movements)
+//displayMovements(account1.movements)
 
-const displayMovementsBalance = function(movements){
-  const balance = movements.reduce((acc, mov) => acc + mov, 0)
-  labelBalance.innerHTML = `${balance} USD`
+const displayMovementsBalance = function(acc){
+  acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0)
+  labelBalance.innerHTML = `${acc.balance} USD`
+
+  console.log(acc.balance)
 }
 
-displayMovementsBalance(account1.movements)
+//displayMovementsBalance(account1.movements)
 
 
-const calcDisplaySummary = function(movements){
-  const income = movements.filter(mov => mov > 0)
+const calcDisplaySummary = function(acc){
+  const income = acc.movements.filter(mov => mov > 0)
                           .reduce((acc, mov) => acc + mov, 0)
         labelSumIn.textContent = `${income}USD`
 
-  const outcome = movements.filter(mov => mov < 0)
+  const outcome = acc.movements.filter(mov => mov < 0)
                            .reduce((acc, mov) => acc + mov, 0)
                   labelSumOut.textContent = `${Math.abs(outcome)}USD`
 
-  const interest = movements.filter(mov => mov > 0)
+  const interest = acc.movements.filter(mov => mov > 0)
                             .map(deposits => deposits  * 1.2/100)
                             // computes interest that are only higher than one, and skip interest lower than one
                             .filter(mov => mov >= 1)
@@ -103,7 +105,7 @@ const calcDisplaySummary = function(movements){
                    labelSumInterest.textContent = `${interest}USD`
 }
 
-calcDisplaySummary(account1.movements)
+//calcDisplaySummary(account1.movements)
 
 
 const createUsername = function(accs){
@@ -114,7 +116,52 @@ const createUsername = function(accs){
 }
 
 createUsername(accounts)
-console.log(accounts)
+//console.log(accounts)
+
+const updateUI = (acc) => {
+  //display movements
+  displayMovements(acc.movements)
+  //display balance
+  displayMovementsBalance(acc)
+  //display summary
+  calcDisplaySummary(acc)
+}
+let currentAccount
+
+//Implementing the LOGIN functionality
+btnLogin.addEventListener('click', function(e){
+  e.preventDefault()
+
+  currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value)
+  if (currentAccount?.pin === Number(inputLoginPin.value)){
+    //display UI and message
+    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`
+    containerApp.style.opacity = 100
+    // clear password and username fields
+    inputLoginUsername.value = inputLoginPin.value = ''
+    // remove cursor and outline focus on input field
+    inputLoginPin.blur()
+    updateUI(currentAccount)
+  }
+})
+
+btnTransfer.addEventListener('click', function(e){
+  e.preventDefault()
+
+  const amount = Number(inputTransferAmount.value)
+  const recieverAcc = accounts.find(acc => acc.username === inputTransferTo.value)
+  if(amount > 0 && recieverAcc && currentAccount?.username !== recieverAcc && currentAccount.balance >= amount){
+    currentAccount.movements.push(-amount)
+    recieverAcc.movements.push(amount)
+    // update UI
+    updateUI(currentAccount)
+     // clear password and username fields
+     inputTransferAmount.value = inputTransferTo.value = ''
+  }
+
+
+})
+
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
