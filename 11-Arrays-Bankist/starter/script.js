@@ -62,9 +62,12 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 
-const displayMovements = function(movements){
+const displayMovements = function(movements, sort){
   containerMovements.innerHTML = ''
-  movements.forEach(function(move, i){
+
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements
+
+  movs.forEach(function(move, i){
     const type = move > 0 ? 'deposit' : 'withdrawal'
     const html = `
       <div class="movements__row">
@@ -156,10 +159,47 @@ btnTransfer.addEventListener('click', function(e){
     // update UI
     updateUI(currentAccount)
      // clear password and username fields
-     inputTransferAmount.value = inputTransferTo.value = ''
   }
+  inputTransferAmount.value = inputTransferTo.value = ''
+})
 
+/**
+ * the some method will be used to implement the request a loan functionality
+ * the bankist app grants a loan if there is one deposits with at least 10% of the requested loan amount
+ */
 
+btnLoan.addEventListener('click', () => {
+  e.preventDefault()
+
+  const amount = Number(inputLoanAmount.value)
+  if(amount > 0 && currentAccount.movements.some(mov => mov > amount * 0.1)) {// 0.1 = 10%
+    currentAccount.movements.push(amount)
+    updateUI(currentAccount)
+    inputLoanAmount.value = ''
+  }
+})
+
+btnClose.addEventListener('click', (e) => {
+  e.preventDefault()
+
+  const closePin = Number(inputClosePin.value)
+  const closeUsername = inputCloseUsername.value
+  if (closePin === currentAccount.pin && closeUsername === currentAccount.username){
+    const index = accounts.findIndex(acc => acc.username === currentAccount.username)
+    console.log(index)
+    accounts.splice(index, 1)
+    containerApp.style.opacity = 0
+    inputClosePin = inputCloseUsername = ''
+  }
+  
+})
+
+let sorted = false
+
+btnSort.addEventListener('click', (e) => {
+  e.preventDefault()
+  displayMovements(currentAccount.movements, !sorted)
+  sorted = !sorted
 })
 
 /////////////////////////////////////////////////
@@ -499,3 +539,121 @@ for(const accountJessica of accounts){
     console.log(accountJessica)
   }
 }
+
+/**
+ * the FINDINDEX method
+ * the findIndex method almost work the same with the FIND method
+ * the difference is that it returns the index of the elemnt or value in question 
+ * go to the btnDelete addEventListerner function to see a use case scenario of the findIndex method
+ */
+
+
+/**
+ * SOME and EVERY method
+ * This method is used to check for an entire condition and returns a boolen 
+ * unlike the includes method that checks for an equality, the some method checks for a wide range of conditions
+ * For example using the includes method to check whether the movemnets array contains deposits(movemnets greater than 0),
+ * returns a false while using the some method returns a true
+ */
+
+console.log(movements.includes(-130)) // returns true
+console.log(movements.includes(movements > 0)) // returns false
+
+console.log(movements.some(mov => mov > 0)) // returns true because there are deposits greater than zero
+
+/**
+ * EVERY method
+ * this method returns true if all the elements in the array certify the conditions
+ */
+
+console.log(movements.every(mov => mov > 0)) //returns false because not all the movements are greater than zero
+console.log(account4.movements.every(mov => mov > 0)) // returns true because all the movements in account4 are all deposits
+
+/**
+ * we can write seperate callbacks and call them in our array methods
+ * For example
+ */
+
+const deposite = mov => mov > 0
+console.log(movements.some(deposite))
+console.log(movements.every(deposite))
+console.log(movements.filter(deposite))
+
+/**
+ * FLAT METHOD
+ * the flat method is used to bring out elements of a sub or nested array into one array
+ * the flat method does not take a callback function
+ * for example
+ */
+
+const arr4 = [[1, 2, 3], 4, 5, [6, 7, 8], 9, 10]
+// the flat method will bring out the nested array into the main array
+console.log(arr4.flat()) // returns [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+const arr5 = [[1,[ 2, 3]], 4, 5, [[6, 7], 8], 9, 10]
+
+// to bring out all the nested array; we need to use the depth argument 
+
+console.log(arr5.flat(2)) // returns [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+/**
+ * for instance if we want to calculate all the sum of the movements in all the accounts into a single figure
+ * we can use the flat method
+ */
+
+const accountMovements = accounts.map(mov => mov.movements)
+const allMovements = accountMovements.flat()
+const overalBalance = allMovements.reduce((acc, mov) => acc + mov, 0)
+console.log(overalBalance)
+
+//alternatively we can chain the methods together 
+
+const accountMovements2 = accounts.map(mov => mov.movements).flat().reduce((acc, mov) => acc + mov, 0)
+console.log(accountMovements2)
+
+/**
+ * FLATMAP METHOD
+ * the flatmap array method is used in place of chain the flat and map method together 
+ * for example using the accountMovements2 chaining; it can be written using the flatMap method
+ */
+
+ const accountMovements3 = accounts.flatMap(mov => mov.movements).reduce((acc, mov) => acc + mov, 0)
+ console.log(accountMovements3)
+
+
+ /**
+  * SORTING ARRAYS
+  * Sorting arrays is done alphabetically base on strings
+  * but proper sorting can be done using the compare callback function 
+  * sorting arrays is mutable i.e; it changes the state of the array
+  * the sort method will not work on an arrya that has both strings and numbers in it
+  * for example lets sort the movements array
+  */
+
+  console.log(movements) // original movement array
+
+ console.log(movements.sort()) // [-130, -400, -650, 1300, 200, 3000, 450, 70]; this is not correct as the sorting is done base on strings
+ // a more concise way of sorting it is to use the compare callback function
+
+ 
+ movements.sort((a, b) => {
+  if(a > b) return 1
+  if(a < b) return -1
+ })
+
+ console.log(movements)
+
+ // this can be written as;
+
+ movements.sort((a, b) => a - b)
+ console.log(movements)
+
+ //sorting in descending order
+
+ movements.sort((a, b) => b - a)
+ console.log(movements)
+
+
+
+
